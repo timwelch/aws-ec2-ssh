@@ -192,7 +192,15 @@ function create_or_update_local_user() {
         /bin/chown -R "${username}:${username}" "$(eval echo ~$username)"
         log "Created new user ${username}"
     fi
-    /usr/sbin/usermod -a -G "${localusergroups}" "${username}"
+
+    # /usr/sbin/usermod -a -G "${localusergroups}" "${username}"
+    # TAW - 20201027 - only modify groups if we need to. Otherwise, FIM products will alert that
+    # we are constantly modifying /etc/groups.XXXXX and /etc/passwd.XXXXX files... 
+    for g in $(echo ${localusergroups}|sed 's/,/ /g')
+    do
+       /bin/groups ${username} | grep $g >/dev/null 2>&1 || /usr/sbin/usermod -a -G "${localusergroups}" "${username}"
+    done
+ 
 
     # Should we add this user to sudo ?
     if [[ ! -z "${SUDOERS_GROUPS}" ]]
