@@ -2,10 +2,10 @@
 
 show_help() {
 cat << EOF
-Usage: ${0##*/} [-g] [-hv] [-a ARN] [-i GROUP,GROUP,...] [-l GROUP,GROUP,...] [-s GROUP] [-p PROGRAM] [-u "ARGUMENTS"] [-r RELEASE]
+Usage: ${0##*/} [-g GITHUB_CLONE] [-hv] [-a ARN] [-i GROUP,GROUP,...] [-l GROUP,GROUP,...] [-s GROUP] [-p PROGRAM] [-u "ARGUMENTS"] [-r RELEASE]
 Install import_users.sh and authorized_key_commands.
 
-    -g                 download latest source from github before installing.
+    -g github_clone    download latest source from GITHUB_CLONE before installing. Defaults to widdix/aws-ec2-ssh repo.
     
     -h                 display this help and exit
     -v                 verbose mode.
@@ -47,13 +47,17 @@ USERADD_ARGS=""
 USERDEL_PROGRAM=""
 USERDEL_ARGS=""
 RELEASE="master"
-DOWNLOAD_LATEST="false"
+DOWNLOAD_LATEST=""
 
-while getopts :ghva:i:l:s:p:u:d:f:r: opt
+while getopts :g:hva:i:l:s:p:u:d:f:r: opt
 do
     case $opt in
         g)
-            DOWNLOAD_LATEST="true"
+            if [ -z "$OPTARG" ]; then
+               DOWNLOAD_LATEST="https://github.com/widdix/aws-ec2-ssh.git"
+            else
+               DOWNLOAD_LATEST="$OPTARG"
+            fi
             ;;
         h)
             show_help
@@ -122,10 +126,10 @@ if ! [ -x "$(which git)" ]; then
     exit 1
 fi
 
-if [ "$DOWNLOAD_LATEST" == "true" ]; then
+if ! [ -z "$DOWNLOAD_LATEST" ]; then
     tmpdir=$(mktemp -d)
     cd "$tmpdir"
-    git clone -b "$RELEASE" https://github.com/widdix/aws-ec2-ssh.git
+    git clone -b "$RELEASE" "$DOWNLOAD_LATEST"
     cd "$tmpdir/aws-ec2-ssh"
 fi
 
