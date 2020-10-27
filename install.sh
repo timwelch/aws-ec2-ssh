@@ -32,8 +32,8 @@ EOF
 }
 
 export SSHD_CONFIG_FILE="/etc/ssh/sshd_config"
-export AUTHORIZED_KEYS_COMMAND_FILE="/opt/authorized_keys_command.sh"
-export IMPORT_USERS_SCRIPT_FILE="/opt/import_users.sh"
+export AUTHORIZED_KEYS_COMMAND_FILE="/etc/aws-ec2-ssh/authorized_keys_command.sh"
+export IMPORT_USERS_SCRIPT_FILE="/etc/aws-ec2-ssh/import_users.sh"
 export MAIN_CONFIG_FILE="/etc/aws-ec2-ssh.conf"
 
 IAM_GROUPS=""
@@ -120,9 +120,9 @@ tmpdir=$(mktemp -d)
 
 cd "$tmpdir"
 
-git clone -b "$RELEASE" https://github.com/widdix/aws-ec2-ssh.git
+# git clone -b "$RELEASE" https://github.com/widdix/aws-ec2-ssh.git
 
-cd "$tmpdir/aws-ec2-ssh"
+# cd "$tmpdir/aws-ec2-ssh"
 
 cp authorized_keys_command.sh $AUTHORIZED_KEYS_COMMAND_FILE
 cp import_users.sh $IMPORT_USERS_SCRIPT_FILE
