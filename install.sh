@@ -2,9 +2,11 @@
 
 show_help() {
 cat << EOF
-Usage: ${0##*/} [-hv] [-a ARN] [-i GROUP,GROUP,...] [-l GROUP,GROUP,...] [-s GROUP] [-p PROGRAM] [-u "ARGUMENTS"] [-r RELEASE]
+Usage: ${0##*/} [-g] [-hv] [-a ARN] [-i GROUP,GROUP,...] [-l GROUP,GROUP,...] [-s GROUP] [-p PROGRAM] [-u "ARGUMENTS"] [-r RELEASE]
 Install import_users.sh and authorized_key_commands.
 
+    -g                 download latest source from github before installing.
+    
     -h                 display this help and exit
     -v                 verbose mode.
 
@@ -45,10 +47,14 @@ USERADD_ARGS=""
 USERDEL_PROGRAM=""
 USERDEL_ARGS=""
 RELEASE="master"
+DOWNLOAD_LATEST="false"
 
-while getopts :hva:i:l:s:p:u:d:f:r: opt
+while getopts :ghva:i:l:s:p:u:d:f:r: opt
 do
     case $opt in
+        g)
+            DOWNLOAD_LATEST="true"
+            ;;
         h)
             show_help
             exit 0
@@ -116,13 +122,12 @@ if ! [ -x "$(which git)" ]; then
     exit 1
 fi
 
-tmpdir=$(mktemp -d)
-
-cd "$tmpdir"
-
-# git clone -b "$RELEASE" https://github.com/widdix/aws-ec2-ssh.git
-
-# cd "$tmpdir/aws-ec2-ssh"
+if [ "$DOWNLOAD_LATEST" == "true" ]; then
+    tmpdir=$(mktemp -d)
+    cd "$tmpdir"
+    git clone -b "$RELEASE" https://github.com/widdix/aws-ec2-ssh.git
+    cd "$tmpdir/aws-ec2-ssh"
+fi
 
 cp authorized_keys_command.sh $AUTHORIZED_KEYS_COMMAND_FILE
 cp import_users.sh $IMPORT_USERS_SCRIPT_FILE
