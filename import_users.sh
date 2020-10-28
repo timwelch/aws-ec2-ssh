@@ -209,7 +209,9 @@ function create_or_update_local_user() {
         SaveUserSudoFilePath="/etc/sudoers.d/$SaveUserFileName"
         if [[ "${SUDOERS_GROUPS}" == "##ALL##" ]] || echo "${sudousers}" | grep "^${username}\$" > /dev/null
         then
-            echo "${username} ALL=(ALL) NOPASSWD:ALL" > "${SaveUserSudoFilePath}"
+            # TAW - 20201028 - ONLY touch the sudoers file IF it doesn't already exist... FIM products will alert that
+            # we are constantly modifying the file every time this runs. Every 10 minutes.
+            [[ -f "${SaveUserSudoFilePath}" ]] || echo "${username} ALL=(ALL) NOPASSWD:ALL" > "${SaveUserSudoFilePath}"
         else
             [[ ! -f "${SaveUserSudoFilePath}" ]] || rm "${SaveUserSudoFilePath}"
         fi
