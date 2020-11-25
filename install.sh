@@ -2,14 +2,15 @@
 
 show_help() {
 cat << EOF
-Usage: ${0##*/} [-g GITHUB_CLONE] [-hv] [-a ARN] [-i GROUP,GROUP,...] [-l GROUP,GROUP,...] [-s GROUP] [-p PROGRAM] [-u "ARGUMENTS"] [-r RELEASE]
+Usage: ${0##*/} [-g GITHUB_CLONE] [-hv] [-a ARN] [-I] [-i GROUP,GROUP,...] [-l GROUP,GROUP,...] [-s GROUP] [-p PROGRAM] [-u "ARGUMENTS"] [-r RELEASE]
 Install import_users.sh and authorized_key_commands.
 
     -g github_clone    download latest source from GITHUB_CLONE before installing. Defaults to widdix/aws-ec2-ssh repo.
     
     -h                 display this help and exit
     -v                 verbose mode.
-
+    -I                 Import Users when installing. Defaults to NOT running import. Useful when install
+                       happens in packer or chef base images.
     -a arn             Assume a role before contacting AWS IAM to get users and keys.
                        This can be used if you define your users in one AWS account, while the EC2
                        instance you use this script runs in another.
@@ -48,8 +49,9 @@ USERDEL_PROGRAM=""
 USERDEL_ARGS=""
 RELEASE="master"
 DOWNLOAD_LATEST=""
+IMPORT_USERS_NOW=""
 
-while getopts :g:hva:i:l:s:p:u:d:f:r: opt
+while getopts :g:hvaI:i:l:s:p:u:d:f:r: opt
 do
     case $opt in
         g)
@@ -62,6 +64,9 @@ do
         h)
             show_help
             exit 0
+            ;;
+        I)
+            IMPORT_USERS_NOW="1"
             ;;
         i)
             IAM_GROUPS="$OPTARG"
@@ -189,6 +194,8 @@ HOME=/
 EOF
 chmod 0644 /etc/cron.d/import_users
 
-$IMPORT_USERS_SCRIPT_FILE
+if ! [ -z "$IMPORT_USERS_NOW" ]; then
+    $IMPORT_USERS_SCRIPT_FILE
+fi
 
 ./install_restart_sshd.sh
